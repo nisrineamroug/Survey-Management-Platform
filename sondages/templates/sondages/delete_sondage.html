@@ -68,7 +68,7 @@
                     <button type="submit" class="btn btn-danger">
                         <i class="fas fa-trash-alt"></i> Delete Survey
                     </button>
-                    <a href="{% url 'survey_details' sondage_id=sondage.id %}" class="btn btn-secondary">
+                    <a href="{% url 'survey_details' sondage_id=sondage.id|stringformat:'s' %}" class="btn btn-secondary">
                         Cancel
                     </a>
                 </form>

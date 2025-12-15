@@ -71,10 +71,10 @@
                 <p>Number of responses: {{ num_responses }}</p>
 
                 <!-- Export Buttons -->
-                <a href="{% url 'export_responses' sondage_id=sondage.id %}" class="btn btn-success">
+                <a href="{% url 'export_responses' sondage_id=sondage.id|stringformat:'s' %}" class="btn btn-success">
                     <i class="fas fa-file-export"></i> Export Responses (CSV)
                 </a>
-                <a href="{% url 'export_responses_excel' sondage_id=sondage.id %}" class="btn btn-info">
+                <a href="{% url 'export_responses_excel' sondage_id=sondage.id|stringformat:'s' %}" class="btn btn-info">
                     <i class="fas fa-file-excel"></i> Export Responses (Excel)
                 </a>
 

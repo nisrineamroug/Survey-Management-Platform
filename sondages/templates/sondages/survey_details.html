@@ -64,6 +64,44 @@
                 <h1 class="card-title">{{ sondage.title }}</h1>
                 <p class="card-text">{{ sondage.description }}</p>
 
+                <h2 class="mt-4">Questions</h2>
+                {% if questions %}
+                    <div class="list-group mb-4">
+                        {% for item in questions %}
+                            <div class="list-group-item bg-dark text-white border-secondary">
+                                <h5>{{ item.question.text }}</h5>
+                                <p class="mb-1">
+                                    <span class="badge bg-info">
+                                        {% if item.question.question_type == 'sc' %}Single Choice
+                                        {% elif item.question.question_type == 'mc' %}Multiple Choice
+                                        {% elif item.question.question_type == 'tx' %}Text
+                                        {% elif item.question.question_type == 'scal' %}Scale
+                                        {% else %}{{ item.question.question_type }}{% endif %}
+                                    </span>
+                                    {% if item.question.required %}<span class="badge bg-warning">Required</span>{% endif %}
+                                </p>
+                                {% if item.choices %}
+                                    <div class="mt-2">
+                                        <strong>Options:</strong>
+                                        <ul class="mb-0">
+                                            {% for choice in item.choices %}
+                                                <li>{{ choice.text }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                                {% if item.question.question_type == 'scal' %}
+                                    <div class="mt-2">
+                                        <strong>Scale:</strong> {{ item.question.min_value }} to {{ item.question.max_value }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No questions yet. <a href="{% url 'add_question' sondage_id=sondage.id|stringformat:'s' %}">Add questions</a></p>
+                {% endif %}
+
                 <h2 class="mt-4">Shareable Link</h2>
                 <div class="input-group mb-3">
                     <input type="text" class="form-control" value="{{ shareable_link }}" readonly id="shareableLinkInput">
@@ -76,8 +114,10 @@
                 <textarea class="form-control" rows="4" readonly id="embedCodeTextarea">{{ embed_code }}</textarea>
 
                 <div class="mt-4">
-                    <a href="{% url 'update_sondage' sondage_id=sondage.id %}" class="btn btn-primary"><i class="fas fa-edit"></i> Update Survey</a>
-                    <a href="{% url 'delete_sondage' sondage_id=sondage.id %}" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Delete Survey</a>
+                    <a href="{% url 'add_question' sondage_id=sondage.id|stringformat:'s' %}" class="btn btn-success"><i class="fas fa-plus"></i> Add Question</a>
+                    <a href="{% url 'update_sondage' sondage_id=sondage.id|stringformat:'s' %}" class="btn btn-primary"><i class="fas fa-edit"></i> Update Survey</a>
+                    <a href="{% url 'survey_results' sondage_id=sondage.id|stringformat:'s' %}" class="btn btn-info"><i class="fas fa-chart-bar"></i> View Results</a>
+                    <a href="{% url 'delete_sondage' sondage_id=sondage.id|stringformat:'s' %}" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Delete Survey</a>
                     <a href="{% url 'dashboard' %}" class="btn btn-secondary">
                         Back to Dashboard
                     </a>

@@ -62,6 +62,43 @@
         <div class="card">
             <div class="card-body">
                 <h1 class="card-title">Update Survey</h1>
+                
+                <h3 class="mt-4">Survey Questions</h3>
+                {% if questions %}
+                    <div class="list-group mb-4">
+                        {% for question in questions %}
+                            <div class="list-group-item bg-dark text-white border-secondary">
+                                <h5>{{ question.text }}</h5>
+                                <p class="mb-1">
+                                    <span class="badge bg-info">
+                                        {% if question.question_type == 'sc' %}Single Choice
+                                        {% elif question.question_type == 'mc' %}Multiple Choice
+                                        {% elif question.question_type == 'tx' %}Text
+                                        {% elif question.question_type == 'scal' %}Scale
+                                        {% else %}{{ question.question_type }}{% endif %}
+                                    </span>
+                                    {% if question.required %}<span class="badge bg-warning">Required</span>{% endif %}
+                                </p>
+                                {% if question.question_type in 'sc' or question.question_type in 'mc' %}
+                                    {% for choice in question.choices %}
+                                        <div class="ms-3">- {{ choice.text }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                                {% if question.question_type == 'scal' %}
+                                    <div class="mt-2">
+                                        <strong>Scale:</strong> {{ question.min_value }} to {{ question.max_value }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-4">No questions yet.</p>
+                {% endif %}
+                
+                <a href="{% url 'add_question' sondage_id=sondage.id|stringformat:'s' %}" class="btn btn-success mb-4"><i class="fas fa-plus"></i> Add Question</a>
+                
+                <h3 class="mt-4">Survey Settings</h3>
                 <form method="POST" action="">
                     {% csrf_token %}
                     <div class="mb-3">
@@ -85,7 +122,7 @@
                         <label class="form-check-label" for="limit_ip">Limit Responses per IP</label>
                     </div>
                     <button type="submit" class="btn btn-primary">Update Survey</button>
-                    <a href="{% url 'survey_details' sondage_id=sondage.id %}" class="btn btn-secondary">
+                    <a href="{% url 'survey_details' sondage_id=sondage.id|stringformat:'s' %}" class="btn btn-secondary">
                         Back
                     </a>
                 </form>

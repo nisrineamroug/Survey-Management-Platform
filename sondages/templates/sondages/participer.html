@@ -76,27 +76,27 @@
         <div class="question">
           <label for="question_{{ question.id }}">{{ question.text }}</label>
 
-          {% if question.question_type == 'text' %}
-            <input type="text" name="reponse_{{ question.id }}" id="question_{{ question.id }}" required>
+          {% if question.question_type == 'tx' %}
+            <input type="text" name="text_{{ question.id }}" id="question_{{ question.id }}" {% if question.required %}required{% endif %}>
 
-          {% elif question.question_type == 'qcu' %}
-            {% for choice in question.choices.all %}
+          {% elif question.question_type == 'sc' %}
+            {% for choice in question.choices %}
               <div class="choice-item">
-                <input type="radio" name="reponse_{{ question.id }}" id="choice_{{ choice.id }}" value="{{ choice.id }}" required>
+                <input type="radio" name="choice_{{ question.id }}" id="choice_{{ choice.id }}" value="{{ choice.id }}" {% if question.required %}required{% endif %}>
                 <label for="choice_{{ choice.id }}">{{ choice.text }}</label>
               </div>
             {% endfor %}
 
-          {% elif question.question_type == 'qcm' %}
-            {% for choice in question.choices.all %}
+          {% elif question.question_type == 'mc' %}
+            {% for choice in question.choices %}
               <div class="choice-item">
-                <input type="checkbox" name="reponse_{{ question.id }}" id="choice_{{ choice.id }}" value="{{ choice.id }}">
+                <input type="checkbox" name="choice_{{ question.id }}" id="choice_{{ choice.id }}" value="{{ choice.id }}">
                 <label for="choice_{{ choice.id }}">{{ choice.text }}</label>
               </div>
             {% endfor %}
 
           {% elif question.question_type == 'scal' %}
-            <select name="reponse_{{ question.id }}" id="question_{{ question.id }}" required>
+            <select name="text_{{ question.id }}" id="question_{{ question.id }}" {% if question.required %}required{% endif %}>
               {% for i in question.scale_range %}
                 <option value="{{ i }}">{{ i }}</option>
               {% endfor %}

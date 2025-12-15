@@ -1,26 +1,43 @@
-from django.db import models
 from django.contrib.auth.models import User
 import uuid
 from django.utils import timezone
+from mongoengine import Document, StringField, DateTimeField, IntField, BooleanField, ReferenceField, ListField
+from mongoengine.fields import UUIDField
 
-class Sondage(models.Model):
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    primary_color = models.CharField(max_length=7, default="#4F46E5")
-    background_color = models.CharField(max_length=7, default="#ffffff")
-    font_family = models.CharField(max_length=100, default="Poppins")
-    shareable_link = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    password = models.CharField(max_length=100, blank=True, null=True)
-    limit_responses = models.BooleanField(default=False)
-    limit_ip = models.BooleanField(default=True)
+# MongoDB Models using mongoengine
+
+class Sondage(Document):
+    title = StringField(max_length=200, required=True)
+    description = StringField(required=True)
+    created_at = DateTimeField(default=timezone.now)
+    updated_at = DateTimeField(default=timezone.now)
+    user_id = IntField(required=True)  # Store Django User ID as integer
+    primary_color = StringField(max_length=7, default="#4F46E5")
+    background_color = StringField(max_length=7, default="#ffffff")
+    font_family = StringField(max_length=100, default="Poppins")
+    shareable_link = UUIDField(default=uuid.uuid4, unique=True)
+    password = StringField(max_length=100, null=True)
+    limit_responses = BooleanField(default=False)
+    limit_ip = BooleanField(default=True)
+    
+    meta = {'collection': 'sondages'}
 
     def __str__(self):
         return self.title
+    
+    @property
+    def user(self):
+        from django.contrib.auth.models import User
+        try:
+            return User.objects.get(id=self.user_id)
+        except User.DoesNotExist:
+            return None
+    
+    @property
+    def questions(self):
+        return Question.objects(sondage=self)
 
-class Question(models.Model):
+class Question(Document):
     QUESTION_TYPES = [
         ('sc', 'Single Choice'),
         ('mc', 'Multiple Choice'),
@@ -28,12 +45,14 @@ class Question(models.Model):
         ('scal','echelle (1-5)'),
     ]
 
-    sondage = models.ForeignKey(Sondage, on_delete=models.CASCADE, related_name='questions')
-    text = models.CharField(max_length=200)
-    question_type = models.CharField(max_length=4, choices=QUESTION_TYPES)
-    required = models.BooleanField(default=True) #la question est elle obligatoire?
-    min_value = models.IntegerField(null=True, blank=True)
-    max_value = models.IntegerField(null=True, blank=True)
+    sondage = ReferenceField(Sondage, reverse_delete_rule=2, required=True)  # CASCADE = 2
+    text = StringField(max_length=200, required=True)
+    question_type = StringField(max_length=4, choices=QUESTION_TYPES, required=True)
+    required = BooleanField(default=True)
+    min_value = IntField(null=True)
+    max_value = IntField(null=True)
+    
+    meta = {'collection': 'questions'}
 
     def __str__(self):
         return self.text
@@ -43,27 +62,46 @@ class Question(models.Model):
         if self.question_type == 'scal' and self.min_value is not None and self.max_value is not None:
             return range(self.min_value, self.max_value + 1)
         return []
+    
+    @property
+    def choices(self):
+        return Choice.objects(question=self)
 
 
-class Choice(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
-    text = models.CharField(max_length=200)
+class Choice(Document):
+    question = ReferenceField(Question, reverse_delete_rule=2, required=True)  # CASCADE = 2
+    text = StringField(max_length=200, required=True)
+    
+    meta = {'collection': 'choices'}
     
     def __str__(self):
         return self.text
+
+
+class Reponse(Document):
+    sondage = ReferenceField(Sondage, reverse_delete_rule=2, required=True)  # CASCADE = 2
+    date = DateTimeField(default=timezone.now)
+    user_id = IntField(null=True)  # Store Django User ID as integer
+    ip_address = StringField(null=True)
+    answer = StringField(max_length=255, default='')
+    created_at = DateTimeField(default=timezone.now)
     
+    meta = {'collection': 'reponses'}
+    
+    @property
+    def user(self):
+        if self.user_id:
+            from django.contrib.auth.models import User
+            try:
+                return User.objects.get(id=self.user_id)
+            except User.DoesNotExist:
+                return None
+        return None
 
-
-class Reponse(models.Model):
-    sondage = models.ForeignKey(Sondage, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
-    answer = models.CharField(max_length=255, default='')
-    created_at = models.DateTimeField(default=timezone.now)  # Modified line
-
-class Answer(models.Model):
-    reponse = models.ForeignKey(Reponse, on_delete=models.CASCADE, related_name='answers')
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    choix = models.ManyToManyField(Choice, blank=True)  # Pour choix multiples
-    texte = models.TextField(blank=True, null=True)      # Pour réponses libres
+class Answer(Document):
+    reponse = ReferenceField(Reponse, reverse_delete_rule=2, required=True)  # CASCADE = 2
+    question = ReferenceField(Question, reverse_delete_rule=2, required=True)  # CASCADE = 2
+    choix = ListField(ReferenceField(Choice), default=list)  # For multiple choices
+    texte = StringField(null=True)  # For free text answers
+    
+    meta = {'collection': 'answers'}

@@ -1,0 +1,146 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Question - SurveyPro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --secondary: #7C3AED;
+      --background: #0F172A;
+      --surface: #1E293B;
+      --text: #F8FAFC;
+    }
+
+    body {
+      background: var(--background);
+      color: var(--text);
+      font-family: 'Poppins', sans-serif;
+      padding: 2rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: none;
+      border-radius: 16px;
+      padding: 2rem;
+    }
+
+    .form-control, .form-select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+
+    .form-control:focus, .form-select:focus {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--primary);
+      color: var(--text);
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1 class="mb-4">Add Question to: {{ sondage.title }}</h1>
+      
+      <form method="POST">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+          <label for="id_text" class="form-label">Question Text:</label>
+          <input type="text" name="text" class="form-control" id="id_text" required>
+        </div>
+        
+        <div class="mb-3">
+          <label for="id_question_type" class="form-label">Question Type:</label>
+          <select name="question_type" class="form-select" id="id_question_type" required>
+            <option value="sc">Single Choice</option>
+            <option value="mc">Multiple Choice</option>
+            <option value="tx">Text</option>
+            <option value="scal">Scale (1-5)</option>
+          </select>
+        </div>
+        
+        <div class="mb-3 form-check">
+          <input type="checkbox" name="required" class="form-check-input" id="id_required" checked>
+          <label class="form-check-label" for="id_required">Required</label>
+        </div>
+        
+        <div id="choices-container" class="mb-3" style="display: none;">
+          <label class="form-label">Answer Choices:</label>
+          <div id="choices-list">
+            <div class="input-group mb-2">
+              <input type="text" name="choices" class="form-control" placeholder="Choice 1">
+              <button type="button" class="btn btn-danger" onclick="removeChoice(this)">Remove</button>
+            </div>
+            <div class="input-group mb-2">
+              <input type="text" name="choices" class="form-control" placeholder="Choice 2">
+              <button type="button" class="btn btn-danger" onclick="removeChoice(this)">Remove</button>
+            </div>
+          </div>
+          <button type="button" class="btn btn-secondary" onclick="addChoice()">Add Choice</button>
+        </div>
+        
+        <div class="mt-4">
+          <button type="submit" class="btn btn-primary">Save Question</button>
+          <a href="{% url 'survey_details' sondage_id=sondage.id|stringformat:'s' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const questionTypeSelect = document.getElementById('id_question_type');
+    const choicesContainer = document.getElementById('choices-container');
+    
+    function toggleChoices() {
+      const value = questionTypeSelect.value;
+      if (value === 'sc' || value === 'mc') {
+        choicesContainer.style.display = 'block';
+      } else {
+        choicesContainer.style.display = 'none';
+      }
+    }
+    
+    questionTypeSelect.addEventListener('change', toggleChoices);
+    toggleChoices(); // Initial check
+    
+    function addChoice() {
+      const choicesList = document.getElementById('choices-list');
+      const div = document.createElement('div');
+      div.className = 'input-group mb-2';
+      div.innerHTML = `
+        <input type="text" name="choices" class="form-control" placeholder="New choice">
+        <button type="button" class="btn btn-danger" onclick="removeChoice(this)">Remove</button>
+      `;
+      choicesList.appendChild(div);
+    }
+    
+    function removeChoice(btn) {
+      const choicesList = document.getElementById('choices-list');
+      if (choicesList.children.length > 1) {
+        btn.closest('.input-group').remove();
+      }
+    }
+  </script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

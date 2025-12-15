@@ -77,16 +77,19 @@ WSGI_APPLICATION = 'sondage_app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# MongoDB configuration using mongoengine
+# For Django auth, we'll use a separate SQLite database
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sondagesdb',
-        'USER': 'root',
-        'PASSWORD': os.getenv("DB_PASSWORD"),
-        'HOST': 'localhost',
-        'PORT':'3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# MongoDB connection for survey data
+MONGODB_DB = 'sondagesdb'
+MONGODB_HOST = 'localhost'
+MONGODB_PORT = 27017
 
 
 # Password validation
