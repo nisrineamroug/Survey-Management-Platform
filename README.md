@@ -1,4 +1,4 @@
-# SondageApp — Survey Management Platform
+# Survey Management Platform
 
 A web-based survey management platform built with Django and MongoDB for creating surveys, managing questions, collecting responses, and organizing user data.
 
@@ -64,7 +64,9 @@ sondageapp/
 ├── QUICK_START.md
 ├── README_MONGODB.md
 └── SETUP_INSTRUCTIONS.md
-Application Workflow
+
+
+## Application Workflow
 
 The application follows a simple survey workflow:
 
@@ -87,7 +89,7 @@ MongoDB
 
 Survey-related entities are organized around users, surveys, questions, and responses, allowing collected data to be stored and managed in a structured way.
 
-Database
+## Database
 
 The project uses MongoDB for storing application data.
 
@@ -100,25 +102,33 @@ Responses
 
 MongoDB Compass can be used to inspect and manage the database during development.
 
-Installation
+## Installation
+
 1. Clone the repository
-git clone https://github.com/nisrineamroug/sondageapp.git
-cd sondageapp
-2. Create a virtual environment
+   
+git clone https://github.com/nisrineamroug/Survey-Management-Platform.git
+
+cd Survey-Management-Platform
+
+3. Create a virtual environment
+   
 python -m venv env
 
-Activate it:
+4. Activate it:
 
-Windows
+Windows :
 
 env\Scripts\activate
 
-Linux / macOS
+Linux / macOS :
 
 source env/bin/activate
-3. Install dependencies
+
+4. Install dependencies
+   
 pip install -r requirements.txt
-4. Configure environment variables
+
+5. Configure environment variables
 
 Create a .env file based on the provided .env.example:
 
@@ -128,13 +138,13 @@ On Windows, you can create the .env file manually if necessary.
 
 Add the required configuration values for the application and MongoDB connection.
 
-5. Configure MongoDB
+6. Configure MongoDB
 
 Make sure MongoDB is available and configure the database connection according to the project's environment configuration.
 
 MongoDB Compass can be used to verify the database connection and inspect stored data.
 
-6. Run the application
+7. Run the application
 python manage.py runserver
 
 The application will then be available through the local Django development server.
